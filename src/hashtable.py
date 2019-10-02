@@ -13,8 +13,9 @@ class HashTable:
     that accepts string keys
     '''
     def __init__(self, capacity):
-        self.capacity = capacity  # Number of buckets in the hash table
-        self.storage = [None] * capacity
+        self.capacity = capacity
+        self.storage = [[]] * capacity
+        self.size = 0
 
 
     def _hash(self, key):
@@ -23,7 +24,14 @@ class HashTable:
 
         You may replace the Python hash with DJB2 as a stretch goal.
         '''
-        return hash(key)
+        # hashsum = 0
+        # for idx, c in enumerate(key):
+        #     hashsum += (idx + len(key)) ** ord(c)
+        #     hashsum = hashsum % self.capacity
+
+        hashsum = hash(key) % self.capacity
+
+        return hashsum
 
 
     def _hash_djb2(self, key):
@@ -51,9 +59,22 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
 
+        hash_key = self._hash(key)
+        key_exists = False
+        bucket = self.storage[hash_key]
+        for i, pair in enumerate(bucket):
+            if key is pair.key:
+                key_exists = True
+                break
+            
+        newPair = LinkedPair(key, value)
+        if key_exists:
+            bucket[i] = newPair
 
+        else:
+            bucket.append(newPair)
+            self.size += 1
 
     def remove(self, key):
         '''
@@ -63,7 +84,21 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        hash_key = self._hash(key)
+        key_exists = False
+        bucket = self.storage[hash_key]
+        for i, pair in enumerate(bucket):
+            if key == pair.key:
+                key_exists = True
+                break
+
+        if key_exists:
+            del bucket[i]
+            print('key removed')
+            self.size -= 1
+
+        else:
+            print('Key not found: ')
 
 
     def retrieve(self, key):
@@ -74,7 +109,13 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        hash_key = self._hash(key)
+        bucket = self.storage[hash_key]
+        for i, pair in enumerate(bucket):
+            if key == pair.key:
+                return pair.value
+
+        return None
 
 
     def resize(self):
@@ -84,7 +125,11 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        currentStorage = self.storage
+        self.storage = [[]] * (self.capacity * 2)
+        for bucket in currentStorage:
+            for pair in bucket:
+                self.insert(pair.key, pair.value)
 
 
 
